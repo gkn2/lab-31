@@ -56,6 +56,3 @@ sprites.on_overlap(SpriteKind.projectile, SpriteKind.food, handle_projectile_hit
 create_hero_sprite()
 create_enemy_grid(3, 5)
 game.on_update_interval(2000, spawn_food)
-
-
-
