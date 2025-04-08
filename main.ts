@@ -7,33 +7,33 @@ function create_hero_sprite() {
     hero_sprite.setStayInScreen(true)
 }
 
-function create_projectile() {
-    let projectile = sprites.createProjectileFromSprite(assets.image`a`, hero_sprite, 0, -100)
+function calculate_score_for_food_hit(food_sprite_hit: Sprite): number {
+    let vertical_distance = Math.abs(hero_sprite.y - food_sprite_hit.y)
+    return Math.max(100 - vertical_distance, 0)
 }
 
-function create_enemy_grid(rows: number, columns: number) {
-    let enemy: Sprite;
-    for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < columns; col++) {
-            enemy = sprites.create(assets.image`b`, SpriteKind.Enemy)
-            enemy.setPosition(30 + col * 20, 20 + row * 20)
+function create_custom_sprite_grid(grid_rows: number, grid_columns: number, sprite_img: any, start_pos_x: number, start_pos_y: number, sprite_kind_value: number) {
+    let new_sprite: Sprite;
+    for (let row_index = 0; row_index < grid_rows; row_index++) {
+        for (let col_index = 0; col_index < grid_columns; col_index++) {
+            new_sprite = sprites.create(sprite_img, sprite_kind_value)
+            new_sprite.setPosition(start_pos_x + col_index * 20, start_pos_y + row_index * 20)
         }
     }
 }
 
-controller.A.onEvent(ControllerButtonEvent.Pressed, function on_a_button_pressed() {
-    create_projectile()
+controller.A.onEvent(ControllerButtonEvent.Pressed, function fire_projectile() {
+    let projectile = sprites.createProjectileFromSprite(assets.image`a`, hero_sprite, 0, -100)
 })
-sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Food, function handle_projectile_hits_food(projectile: Sprite, food: Sprite) {
-    let distance = Math.abs(projectile.y - hero_sprite.y)
-    info.changeScoreBy(100 - distance)
-    projectile.destroy()
-    food.destroy()
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Food, function on_projectile_hits_food(projectile_sprite: Sprite, food_target_sprite: Sprite) {
+    info.changeScoreBy(calculate_score_for_food_hit(food_target_sprite))
+    projectile_sprite.destroy()
+    food_target_sprite.destroy(effects.spray, 250)
 })
 create_hero_sprite()
-create_enemy_grid(3, 5)
+create_custom_sprite_grid(3, 5, assets.image`b`, 30, 20, SpriteKind.Enemy)
 game.onUpdateInterval(2000, function spawn_food() {
-    let food = sprites.create(assets.image`burger`, SpriteKind.Food)
-    food.setPosition(randint(10, 150), 0)
-    food.setVelocity(0, 40)
+    let falling_food = sprites.create(assets.image`burger`, SpriteKind.Food)
+    falling_food.setPosition(randint(10, 150), 0)
+    falling_food.setVelocity(0, 40)
 })
